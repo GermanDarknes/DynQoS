@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="TAE-Stecker" serif:id="TAE Stecker" transform="matrix(42.499346,0,0,42.499346,-155.688235,1024)">
+        <path d="M14.173,0L14.173,-1.064L16.179,-1.064L16.179,-3.188L14.173,-3.188L14.173,-4.252L11.339,-4.252L11.339,-7.087L14.173,-7.087L14.173,-9.921L11.339,-9.921L11.339,-12.756L14.173,-12.756L14.173,-15.591L11.339,-15.591L11.339,-18.425L14.173,-18.425L14.173,-24.094L5.669,-24.094L5.669,-18.425L8.504,-18.425L8.504,-15.591L5.669,-15.591L5.669,-12.756L8.504,-12.756L8.504,-9.921L5.669,-9.921L5.669,-7.087L8.504,-7.087L8.504,-4.252L5.669,-4.252L5.669,-3.188L3.663,-3.188L3.663,-1.064L5.669,-1.064L5.669,0L14.173,-0"/>
+    </g>
+    <g transform="matrix(5.856196,0,0,5.856196,-2358.757512,-1107.306672)">
+        <text x="513.401px" y="274.726px" style="font-family:'Pixeled';font-size:71.372px;">D</text>
+        <g transform="matrix(71.371846,0,0,71.371846,591.908236,363.940465)">
+        </g>
+        <text x="506.266px" y="363.94px" style="font-family:'Pixeled';font-size:71.372px;">Q</text>
+    </g>
+</svg>

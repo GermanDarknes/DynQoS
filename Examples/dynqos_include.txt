@@ -1,0 +1,5 @@
+ts3client_win64
+teamspeak
+discord
+mumble
+obs64
