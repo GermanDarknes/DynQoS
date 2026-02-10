@@ -30,7 +30,7 @@ namespace DynQoS
         internal Logic()
         {
             TrayContext.ClearMenu();
-            TrayContext.AddElement("Initializing...", null);
+            TrayContext.AddElement("Initializing...");
             TrayContext.UpdateMenu();
 
             PS = new PowerShellHelper().GetPowerShell();
