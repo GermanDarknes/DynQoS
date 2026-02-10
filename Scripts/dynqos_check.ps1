@@ -1,5 +1,5 @@
 while ($true) {
 	Clear-Host
-	Get-NetQosPolicy | Select-Object Name | Format-Table -AutoSize
+	Get-NetQosPolicy -Name "Dynamic QoS - *" | Select-Object Name, AppPathNameMatchCondition, DSCPAction
 	Start-Sleep 5
 }
