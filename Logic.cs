@@ -115,7 +115,7 @@ namespace DynQoS
         internal void ClearQoSPolicies(object? sender = null, EventArgs? e = null)
         {
             _powerShell.Commands.Clear();
-            _powerShell.AddScript("Get-NetQosPolicy -Name \"Dynamic QoS - *\" | Remove-NetQosPolicy -Confirm:$false -ErrorAction SilentlyContinue");
+            _powerShell.AddScript("Remove-NetQosPolicy -Name \"Dynamic QoS - *\" -Confirm:$false -ErrorAction SilentlyContinue");
             _powerShell.Invoke();
 
             _processedExecutables.Clear();
