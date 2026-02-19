@@ -8,165 +8,165 @@ namespace DynQoS
     internal class Logic
     {
         private const string TrayIconHoverText = "Dynamic QoS Injector";
-        private readonly TrayIconContext TrayContext= new(TrayIconHoverText);
+        private readonly TrayIconContext _trayContext = new(TrayIconHoverText);
 
-        HashSet<string> DiscordExecutables = [];
-        HashSet<string> IncludeExectuables = [];
-        HashSet<string> ExcludeExecutables = [];
-        HashSet<string> QoSExecutables = [];
-        HashSet<string> ProcessedExecutables = [];
+        private HashSet<string> _discordExecutables = [];
+        private HashSet<string> _includeExecutables = [];
+        private HashSet<string> _excludeExecutables = [];
+        private HashSet<string> _qosExecutables = [];
+        private HashSet<string> _processedExecutables = [];
 
         private static string ExeDirectory => Path.GetDirectoryName(Environment.ProcessPath) ?? AppContext.BaseDirectory;
-        private readonly string DiscordExecutablesPath = Path.Combine(ExeDirectory, "dynqos_discord.txt");
-        private readonly string IncludeExectuablePath = Path.Combine(ExeDirectory, "dynqos_include.txt");
-        private readonly string ExcludeExectuablePath = Path.Combine(ExeDirectory, "dynqos_exclude.txt");
+        private readonly string _discordExecutablesPath = Path.Combine(ExeDirectory, "dynqos_discord.txt");
+        private readonly string _includeExecutablePath = Path.Combine(ExeDirectory, "dynqos_include.txt");
+        private readonly string _excludeExecutablePath = Path.Combine(ExeDirectory, "dynqos_exclude.txt");
 
-        private System.Timers.Timer ProcessCheckTimer;
+        private System.Timers.Timer _processCheckTimer;
 
-        private PowerShell PS;
+        private PowerShell _powerShell;
 
-        private int ProcessCheckTimeInSeconds = 5;
+        private const int ProcessCheckTimeInSeconds = 5;
 
         internal Logic()
         {
-            TrayContext.ClearMenu();
-            TrayContext.AddElement("Initializing...");
-            TrayContext.UpdateMenu();
+            _trayContext.ClearMenu();
+            _trayContext.AddElement("Initializing...");
+            _trayContext.UpdateMenu();
 
-            PS = new PowerShellHelper().GetPowerShell();
+            _powerShell = new PowerShellHelper().GetPowerShell();
 
-            ReloadExectuablesLists();
+            ReloadExecutableLists();
             ClearQoSPolicies();
 
-            ProcessCheckTimer = new System.Timers.Timer(ProcessCheckTimeInSeconds * 1000);
-            ProcessCheckTimer.Elapsed += ProcessCheck;
-            ProcessCheckTimer.AutoReset = true;
-            ProcessCheckTimer.Enabled = true;
+            _processCheckTimer = new System.Timers.Timer(ProcessCheckTimeInSeconds * 1000);
+            _processCheckTimer.Elapsed += ProcessCheck;
+            _processCheckTimer.AutoReset = true;
+            _processCheckTimer.Enabled = true;
         }
 
-        internal void CombineExectuableLists()
+        internal void CombineExecutableLists()
         {
-            QoSExecutables = new HashSet<string>();
-            QoSExecutables.UnionWith(DiscordExecutables);
-            QoSExecutables.UnionWith(IncludeExectuables);
-            QoSExecutables.ExceptWith(ExcludeExecutables);
+            _qosExecutables.Clear();
+            _qosExecutables.UnionWith(_discordExecutables);
+            _qosExecutables.UnionWith(_includeExecutables);
+            _qosExecutables.ExceptWith(_excludeExecutables);
             BuildContextMenu();
         }
 
-        internal void ReloadExectuablesLists(object? Sender = null, EventArgs? E = null)
+        internal void ReloadExecutableLists(object? sender = null, EventArgs? e = null)
         {
             LoadDiscordExecutables();
             LoadIncludeExecutables();
             LoadExcludeExecutables();
         }
 
-        internal void LoadDiscordExecutables(object? Sender = null, EventArgs? E = null)
+        internal void LoadDiscordExecutables(object? sender = null, EventArgs? e = null)
         {
             try
             {
-                DiscordExecutables = Utilities.DownloadExecutablesFromDiscord();
-                File.WriteAllLines(DiscordExecutablesPath, DiscordExecutables);
+                _discordExecutables = Utilities.DownloadExecutablesFromDiscord();
+                File.WriteAllLines(_discordExecutablesPath, _discordExecutables);
             }
             catch (Exception)
             {
-                DiscordExecutables = Utilities.ReadExectuablesFromFile(DiscordExecutablesPath);
+                _discordExecutables = Utilities.ReadExecutablesFromFile(_discordExecutablesPath);
             }
-            CombineExectuableLists();
+            CombineExecutableLists();
         }
 
-        internal void LoadIncludeExecutables(object? Sender = null, EventArgs? E = null)
+        internal void LoadIncludeExecutables(object? sender = null, EventArgs? e = null)
         {
-            IncludeExectuables = Utilities.ReadExectuablesFromFile(IncludeExectuablePath);
-            CombineExectuableLists();
+            _includeExecutables = Utilities.ReadExecutablesFromFile(_includeExecutablePath);
+            CombineExecutableLists();
         }
 
-        internal void LoadExcludeExecutables(object? Sender = null, EventArgs? E = null)
+        internal void LoadExcludeExecutables(object? sender = null, EventArgs? e = null)
         {
-            ExcludeExecutables = Utilities.ReadExectuablesFromFile(ExcludeExectuablePath);
+            _excludeExecutables = Utilities.ReadExecutablesFromFile(_excludeExecutablePath);
             RemoveExcludeQoSPolicies();
-            CombineExectuableLists();
+            CombineExecutableLists();
         }
 
-        internal void NewNetQosPolicy(String QoSProcess)
+        internal void NewNetQosPolicy(string qosProcess)
         {
-            if (!ProcessedExecutables.Contains(QoSProcess))
+            if (!_processedExecutables.Contains(qosProcess))
             {
-                PS.Commands.Clear();
-                PS.AddCommand("New-NetQosPolicy")
-                  .AddParameter("Name", $"Dynamic QoS - {QoSProcess}")
-                  .AddParameter("AppPathNameMatchCondition", $"{QoSProcess}.exe")
+                _powerShell.Commands.Clear();
+                _powerShell.AddCommand("New-NetQosPolicy")
+                  .AddParameter("Name", $"Dynamic QoS - {qosProcess}")
+                  .AddParameter("AppPathNameMatchCondition", $"{qosProcess}.exe")
                   .AddParameter("DSCPAction", 1)
                   .AddParameter("IPProtocolMatchCondition", "Both");
-                PS.Invoke();
+                _powerShell.Invoke();
 
-                ProcessedExecutables.Add(QoSProcess);
+                _processedExecutables.Add(qosProcess);
             }
         }
 
-        internal void RemoveNetQosPolicy(String QoSProcess)
+        internal void RemoveNetQosPolicy(string qosProcess)
         {
-            PS.Commands.Clear();
-            PS.AddScript($"Remove-NetQosPolicy -Name \"Dynamic QoS - {QoSProcess}\" -Confirm:$false -ErrorAction SilentlyContinue");
-            PS.Invoke();
+            _powerShell.Commands.Clear();
+            _powerShell.AddScript($"Remove-NetQosPolicy -Name \"Dynamic QoS - {qosProcess}\" -Confirm:$false -ErrorAction SilentlyContinue");
+            _powerShell.Invoke();
 
-            ProcessedExecutables.Remove(QoSProcess);
+            _processedExecutables.Remove(qosProcess);
         }
 
-        internal void ClearQoSPolicies(object? Sender = null, EventArgs? E = null)
+        internal void ClearQoSPolicies(object? sender = null, EventArgs? e = null)
         {
-            PS.Commands.Clear();
-            PS.AddScript("Get-NetQosPolicy -Name \"Dynamic QoS - *\" | Remove-NetQosPolicy -Confirm:$false -ErrorAction SilentlyContinue");
-            PS.Invoke();
+            _powerShell.Commands.Clear();
+            _powerShell.AddScript("Get-NetQosPolicy -Name \"Dynamic QoS - *\" | Remove-NetQosPolicy -Confirm:$false -ErrorAction SilentlyContinue");
+            _powerShell.Invoke();
 
-            ProcessedExecutables.Clear();
+            _processedExecutables.Clear();
             ProcessCheck();
         }
 
         internal void RemoveExcludeQoSPolicies()
         {
-            foreach (var QoSProcess in ExcludeExecutables)
+            foreach (var qosProcess in _excludeExecutables)
             {
-                RemoveNetQosPolicy(QoSProcess);
+                RemoveNetQosPolicy(qosProcess);
             }
         }
 
-        internal void ProcessCheck(object? Sender = null, EventArgs? E = null)
+        internal void ProcessCheck(object? sender = null, EventArgs? e = null)
         {
-            var RunningQosProcesses = Process.GetProcesses()
-                .Where(p => !string.IsNullOrEmpty(p.ProcessName))
-                .Where(p => QoSExecutables.Contains(p.ProcessName.ToLowerInvariant()))
-                .Where(p => !ProcessedExecutables.Contains(p.ProcessName.ToLowerInvariant()))
-                .Select(p => p.ProcessName.ToLowerInvariant())
+            var runningQosProcesses = Process.GetProcesses()
+                .Where(process => !string.IsNullOrEmpty(process.ProcessName))
+                .Where(process => _qosExecutables.Contains(process.ProcessName.ToLowerInvariant()))
+                .Where(process => !_processedExecutables.Contains(process.ProcessName.ToLowerInvariant()))
+                .Select(process => process.ProcessName.ToLowerInvariant())
                 .Distinct()
                 .ToHashSet();
 
-            foreach (var QoSProcess in RunningQosProcesses)
+            foreach (var qosProcess in runningQosProcesses)
             {
-                NewNetQosPolicy(QoSProcess);
+                NewNetQosPolicy(qosProcess);
             }
         }
 
 
-        internal void BuildContextMenu(object? Sender = null, EventArgs? E = null)
+        internal void BuildContextMenu(object? sender = null, EventArgs? e = null)
         {
-            TrayContext.ClearMenu();
-            TrayContext.AddElement($"Reload All ({QoSExecutables.Count})", MenuFunction: new EventHandler(ReloadExectuablesLists));
-            TrayContext.AddElement($"Reload Discord ({DiscordExecutables.Count})", MenuFunction: new EventHandler(LoadDiscordExecutables));
-            TrayContext.AddElement($"Reload Include ({IncludeExectuables.Count})", MenuFunction: new EventHandler(LoadIncludeExecutables));
-            TrayContext.AddElement($"Reload Exclude ({ExcludeExecutables.Count})", MenuFunction: new EventHandler(LoadExcludeExecutables));
+            _trayContext.ClearMenu();
+            _trayContext.AddElement($"Reload All ({_qosExecutables.Count})", menuFunction: new EventHandler(ReloadExecutableLists));
+            _trayContext.AddElement($"Reload Discord ({_discordExecutables.Count})", menuFunction: new EventHandler(LoadDiscordExecutables));
+            _trayContext.AddElement($"Reload Include ({_includeExecutables.Count})", menuFunction: new EventHandler(LoadIncludeExecutables));
+            _trayContext.AddElement($"Reload Exclude ({_excludeExecutables.Count})", menuFunction: new EventHandler(LoadExcludeExecutables));
 
-            TrayContext.AddStrip();
-            TrayContext.AddElement("Clear QoS Policies", MenuFunction: new EventHandler(ClearQoSPolicies));
+            _trayContext.AddStrip();
+            _trayContext.AddElement("Clear QoS Policies", menuFunction: new EventHandler(ClearQoSPolicies));
 
-            TrayContext.AddStrip();
-            TrayContext.AddElement("Close", MenuFunction: new EventHandler(TrayContext.Close));
+            _trayContext.AddStrip();
+            _trayContext.AddElement("Close", menuFunction: new EventHandler(_trayContext.Close));
 
-            TrayContext.UpdateMenu();
+            _trayContext.UpdateMenu();
         }
 
         internal TrayIconContext GetContext()
         {
-            return TrayContext;
+            return _trayContext;
         }
     }
 }

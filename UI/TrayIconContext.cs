@@ -2,67 +2,67 @@
 {
     internal class TrayIconContext : ApplicationContext
     {
-        private readonly NotifyIcon TrayIcon;
-        private ContextMenuStrip TrayContextMenu;
+        private readonly NotifyIcon _trayIcon;
+        private ContextMenuStrip _trayContextMenu;
 
-        public TrayIconContext(string TrayIconHoverText)
+        public TrayIconContext(string trayIconHoverText)
         {
-            TrayIcon = new NotifyIcon
+            _trayIcon = new NotifyIcon
             {
-                Text = TrayIconHoverText,
+                Text = trayIconHoverText,
                 Icon = Resources.IconData.TrayIcon
             };
 
-            TrayContextMenu = new ContextMenuStrip();
+            _trayContextMenu = new ContextMenuStrip();
 
-            TrayIcon.Visible = true;
+            _trayIcon.Visible = true;
         }
 
         public void Close(object? sender, EventArgs? e)
         {
-            TrayIcon.Visible = false;
+            _trayIcon.Visible = false;
 
             Application.Exit();
         }
 
-        public ToolStripMenuItem AddElement(string MenuName, EventHandler? MenuFunction = null, bool MenuEnabled = true, ToolStripMenuItem? MenuItem = null, Image? MenuImage = null)
+        public ToolStripMenuItem AddElement(string menuName, EventHandler? menuFunction = null, bool menuEnabled = true, ToolStripMenuItem? menuItem = null, Image? menuImage = null)
         {
-            ToolStripMenuItem NewMenuItem = new ToolStripMenuItem(MenuName);
-            NewMenuItem.Click += MenuFunction;
-            NewMenuItem.Enabled = MenuEnabled;
-            NewMenuItem.Image = MenuImage;
+            ToolStripMenuItem newMenuItem = new ToolStripMenuItem(menuName);
+            newMenuItem.Click += menuFunction;
+            newMenuItem.Enabled = menuEnabled;
+            newMenuItem.Image = menuImage;
 
-            if (MenuItem != null)
+            if (menuItem != null)
             {
-                MenuItem.DropDownItems.Add(NewMenuItem);
+                menuItem.DropDownItems.Add(newMenuItem);
             }
             else
             {
-                TrayContextMenu.Items.Add(NewMenuItem);
+                _trayContextMenu.Items.Add(newMenuItem);
             }
 
-            return NewMenuItem;
+            return newMenuItem;
         }
 
         public void AddStrip()
         {
-            TrayContextMenu.Items.Add(new ToolStripSeparator());
+            _trayContextMenu.Items.Add(new ToolStripSeparator());
         }
 
         public void ClearMenu()
         {
-            TrayContextMenu = new ContextMenuStrip();
-            TrayIcon.ContextMenuStrip = TrayContextMenu;
+            _trayContextMenu = new ContextMenuStrip();
+            _trayIcon.ContextMenuStrip = _trayContextMenu;
         }
 
         public void UpdateMenu()
         {
-            TrayIcon.ContextMenuStrip = TrayContextMenu;
+            _trayIcon.ContextMenuStrip = _trayContextMenu;
         }
 
-        private void ShowMenu(object? Sender = null, EventArgs? E = null)
+        private void ShowMenu(object? sender = null, EventArgs? e = null)
         {
-            TrayContextMenu.Show(Cursor.Position);
+            _trayContextMenu.Show(Cursor.Position);
         }
     }
 }

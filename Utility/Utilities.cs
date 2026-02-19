@@ -6,12 +6,12 @@ namespace DynQoS.Utility
     {
         public static HashSet<string> DownloadExecutablesFromDiscord()
         {
-            using var HttpClient = new HttpClient();
-            HashSet<string> DiscordExecutables = [];
-            var DiscordJson = HttpClient.GetStringAsync("https://discord.com/api/v10/applications/detectable").GetAwaiter().GetResult();
-            using var DiscordJsonDocument = JsonDocument.Parse(DiscordJson);
+            using var httpClient = new HttpClient();
+            HashSet<string> discordExecutables = [];
+            var discordJson = httpClient.GetStringAsync("https://discord.com/api/v10/applications/detectable").GetAwaiter().GetResult();
+            using var discordJsonDocument = JsonDocument.Parse(discordJson);
 
-            foreach (var app in DiscordJsonDocument.RootElement.EnumerateArray())
+            foreach (var app in discordJsonDocument.RootElement.EnumerateArray())
             {
                 if (app.TryGetProperty("executables", out var executables) && executables.ValueKind == JsonValueKind.Array)
                 {
@@ -24,32 +24,32 @@ namespace DynQoS.Utility
                             var exeName = Path.GetFileNameWithoutExtension(name.GetString() ?? "").ToLowerInvariant();
                             if (!string.IsNullOrEmpty(exeName))
                             {
-                                DiscordExecutables.Add(exeName);
+                                discordExecutables.Add(exeName);
                             }
                         }
                     }
                 }
             }
 
-            return DiscordExecutables;
+            return discordExecutables;
         }
 
-        public static HashSet<string> ReadExectuablesFromFile(String ExecutablesPath)
+        public static HashSet<string> ReadExecutablesFromFile(string executablesPath)
         {
-            HashSet<string> ExecutablesList = [];
+            HashSet<string> executablesList = [];
 
-            if (File.Exists(ExecutablesPath))
+            if (File.Exists(executablesPath))
             {
-                ExecutablesList = File.ReadAllLines(ExecutablesPath)
-                    .Where(Name => !string.IsNullOrEmpty(Name))
-                    .Select(Name => Path.GetFileNameWithoutExtension(Name))
-                    .Select(Name => Name.Trim().ToLowerInvariant())
-                    .Where(Name => !string.IsNullOrEmpty(Name))
+                executablesList = File.ReadAllLines(executablesPath)
+                    .Where(name => !string.IsNullOrEmpty(name))
+                    .Select(name => Path.GetFileNameWithoutExtension(name))
+                    .Select(name => name.Trim().ToLowerInvariant())
+                    .Where(name => !string.IsNullOrEmpty(name))
                     .Distinct()
                     .ToHashSet();
             }
 
-            return ExecutablesList;
+            return executablesList;
         }
     }
 }

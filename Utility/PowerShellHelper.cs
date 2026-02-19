@@ -6,24 +6,24 @@ namespace DynQoS.Utility
 {
     internal class PowerShellHelper
     {
-        private InitialSessionState ISS;
-        private Runspace RS;
-        private PowerShell PS;
+        private InitialSessionState _initialSessionState;
+        private Runspace _runspace;
+        private PowerShell _powerShell;
         internal PowerShellHelper() {
-            ISS = InitialSessionState.CreateDefault();
-            ISS.ExecutionPolicy = ExecutionPolicy.Bypass;
-            ISS.ImportPSModule(["NetQos"]);
+            _initialSessionState = InitialSessionState.CreateDefault();
+            _initialSessionState.ExecutionPolicy = ExecutionPolicy.Bypass;
+            _initialSessionState.ImportPSModule(["NetQos"]);
 
-            RS = RunspaceFactory.CreateRunspace(ISS);
-            RS.Open();
+            _runspace = RunspaceFactory.CreateRunspace(_initialSessionState);
+            _runspace.Open();
 
-            PS = System.Management.Automation.PowerShell.Create();
-            PS.Runspace = RS;
+            _powerShell = System.Management.Automation.PowerShell.Create();
+            _powerShell.Runspace = _runspace;
         }
 
         public PowerShell GetPowerShell()
         {
-            return PS;
+            return _powerShell;
         }
     }
 }
